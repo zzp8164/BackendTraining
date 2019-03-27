@@ -3,53 +3,73 @@ var connections, count, net, port, responseData, server
 
 net = require("net")
 var Message = require("./message")
-responseData = [0, 1, 2, 3].map(()=>"0123456789").join("")
+responseData = [0, 1, 2, 3].map(() => "0123456789").join("")
 
 connections = {}
 
 count = 0
 
-server = net.createServer((c)=>{
+
+
+function handleHeartbeat(message) {
+  console.log(message)
+  return
+}
+
+function handleLogin(message) {
+  console.log(message)
+  const user = JSON.parse(message.content)
+  if (user.name)
+    console.log("login successfuly with user id " + user.name)
+  return
+}
+
+function handleNewMsg() {
+  console.log(message)
+  setTimeout(() => {
+    message.content += "hoho!!"
+    c.write(message.toChunk())
+  }, Math.random() * 100)
+  return
+}
+
+const messageHandler = {
+  10001: handleHeartbeat,
+  11001: handleLogin,
+  12001: handleNewMsg
+}
+server = net.createServer((c) => {
   c.id = count++
   connections[c.id] = true
-  c.on("end", ()=>{
+  c.on("end", () => {
     if (connections[c.id]) delete connections[c.id]
 
     console.log("connection end" + c.id)
   })
 
-  c.on("error", (err)=>{
+  c.on("error", (err) => {
     if (connections[c.id]) delete connections[c.id]
     console.log(err, c.id)
 
   })
 
-  c.on("data", (chunk)=>{
+  c.on("data", (chunk) => {
     var handletype, type
     var message = Message.ReadMessage(chunk)
-    switch (message.cmd) {
-      case Message.Type.HB:
-        console.log(message)
-        return
+    console.log(message.cmd)
+    messageHandler[message.cmd](message)
 
-      case Message.Type.NewMsg:
-        console.log(message)
-        setTimeout(()=>{
-          message.content += "hoho!!"
-          c.write(message.toChunk())
-        }, Math.random() * 100)
-        return
-    }
+
   })
 })
 
 port = process.env.port || 8125
 
-server.listen(port, ()=>{
+server.listen(port, () => {
   console.log("server bound")
   process.stdin.resume()
 })
 
-setInterval(()=>{
+setInterval(() => {
   console.log("count:" + (Object.keys(connections).length) + ", \ntime:" + (new Date()))
 }, 2000)

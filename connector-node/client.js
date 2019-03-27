@@ -18,9 +18,10 @@ connect = (host, port)=>{
     host: host
   }, ()=>{
 
-    const heartbeatMessage = MessageGenerater(seq++, Message.Type.HB, "心跳起来")
-    client.write(heartbeatMessage.toChunk())
+    client.write(MessageGenerater(seq++, Message.Type.HB, "心跳起来").toChunk())
     
+    client.write(MessageGenerater(seq++, Message.Type.Login, JSON.stringify( { name: "soulmate"})).toChunk())
+
     setInterval(()=>{
       const heartbeatMessage = MessageGenerater(seq++, Message.Type.NewMsg, "发了一条新的的消息")
       client.write(heartbeatMessage.toChunk())
