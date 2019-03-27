@@ -2,7 +2,8 @@
 var connections, count, net, port, responseData, server
 
 net = require("net")
-var Message = require("./message")
+const Message = require("./message")
+const Api = require("./api")
 responseData = [0, 1, 2, 3].map(() => "0123456789").join("")
 
 connections = {}
@@ -15,10 +16,11 @@ function handleHeartbeat(message) {
   return
 }
 
-function handleLogin(message) {
-  const user = JSON.parse(message.content)
-  if (user.name)
-    console.log("login successfuly with user id " + user.name)
+async function handleLogin(message, c) {
+  Api.login(JSON.parse(message.content))
+
+  if (connections[c.id]) delete connections[c.id]
+
   return
 }
 
