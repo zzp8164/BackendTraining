@@ -1,47 +1,35 @@
-var net = require("net")
-var host = process.env.host || "127.0.0.1"
-var port = process.env.port || 8125
-var Message = require("./message")
+const net = require("net")
+const host = process.env.host || "127.0.0.1"
+const port = process.env.port || 8125
+const Message = require("./message")
 
+
+function MessageGenerater(seq, cmd, content) {
+  const message = new Message()
+  message.seq = seq++
+  message.cmd = cmd
+  message.content = content
+  return message
+}
 connect = (host, port)=>{
-  var client
-  var seq = 0
-  client = net.connect({
+  let seq = 0
+  const client = net.connect({
     port: port,
     host: host
   }, ()=>{
-    var message = new Message()
-    message.seq = seq++
-    message.cmd = Message.Type.HB
-    message.content = "心跳起来"
 
-    console.log(message.toChunk())
-    client.write(message.toChunk())
-    console.log(message)
-
+    const heartbeatMessage = MessageGenerater(seq++, Message.Type.HB, "心跳起来")
+    client.write(heartbeatMessage.toChunk())
+    
     setInterval(()=>{
-      var start = Date.now()
-      var message = new Message()
-      message.seq = seq++
-      message.cmd = Message.Type.NewMsg
-      message.content = "发了一条新的的消息"
-
-      client.write(message.toChunk())
-      console.log(message)
+      const heartbeatMessage = MessageGenerater(seq++, Message.Type.NewMsg, "发了一条新的的消息")
+      client.write(heartbeatMessage.toChunk())
     }, 5 * 1000)
 
   })
 
   client.on("data", (chunk)=>{
-    // var diff, result, start
-
-    // start = parseInt(chunk.toString("utf8", 3, 16))
-    // diff = Date.now() - start
-    // result = chunk.toString("utf8")
-
-    // console.log("rece diff:" + diff + " " + result)
-
-    var message = Message.ReadMessage(chunk)
+    const message = Message.ReadMessage(chunk)
     console.log(message)
   })
 
