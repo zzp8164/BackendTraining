@@ -11,16 +11,18 @@ function MessageGenerater(seq, cmd, content) {
   message.content = content
   return message
 }
-connect = (host, port)=>{
+connect = (host, port) => {
   let seq = 0
   const client = net.connect({
     port: port,
     host: host
-  }, ()=>{
+  }, () => {
 
-    client.write(MessageGenerater(seq++, Message.Type.Login, JSON.stringify( { name: "soulmate"})).toChunk())
+    client.write(MessageGenerater(seq++, Message.Type.Login, JSON.stringify({
+      name: "soulmate"
+    })).toChunk())
 
-    setInterval(()=>{
+    setInterval(() => {
       const NewMsg = MessageGenerater(seq++, Message.Type.NewMsg, "发了一条新的的消息")
       client.write(NewMsg.toChunk())
       const heartbeatMessage = MessageGenerater(seq++, Message.Type.HB, "心跳起来")
@@ -28,16 +30,16 @@ connect = (host, port)=>{
     }, 5 * 1000)
   })
 
-  client.on("data", (chunk)=>{
+  client.on("data", (chunk) => {
     const message = Message.ReadMessage(chunk)
     console.log(message)
   })
 
-  client.on("end", ()=>{
+  client.on("end", () => {
     console.log("end")
   })
 
-  client.on("error", (error)=>{
+  client.on("error", (error) => {
     console.log("error", error)
   })
 }
