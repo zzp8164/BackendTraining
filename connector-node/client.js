@@ -18,15 +18,14 @@ connect = (host, port)=>{
     host: host
   }, ()=>{
 
-    client.write(MessageGenerater(seq++, Message.Type.HB, "心跳起来").toChunk())
-    
     client.write(MessageGenerater(seq++, Message.Type.Login, JSON.stringify( { name: "soulmate"})).toChunk())
 
     setInterval(()=>{
-      const heartbeatMessage = MessageGenerater(seq++, Message.Type.NewMsg, "发了一条新的的消息")
+      const NewMsg = MessageGenerater(seq++, Message.Type.NewMsg, "发了一条新的的消息")
+      client.write(NewMsg.toChunk())
+      const heartbeatMessage = MessageGenerater(seq++, Message.Type.HB, "心跳起来")
       client.write(heartbeatMessage.toChunk())
     }, 5 * 1000)
-
   })
 
   client.on("data", (chunk)=>{

@@ -12,20 +12,17 @@ count = 0
 
 
 function handleHeartbeat(message) {
-  console.log(message)
   return
 }
 
 function handleLogin(message) {
-  console.log(message)
   const user = JSON.parse(message.content)
   if (user.name)
     console.log("login successfuly with user id " + user.name)
   return
 }
 
-function handleNewMsg() {
-  console.log(message)
+function handleNewMsg(message, c) {
   setTimeout(() => {
     message.content += "hoho!!"
     c.write(message.toChunk())
@@ -54,12 +51,8 @@ server = net.createServer((c) => {
   })
 
   c.on("data", (chunk) => {
-    var handletype, type
-    var message = Message.ReadMessage(chunk)
-    console.log(message.cmd)
-    messageHandler[message.cmd](message)
-
-
+    const message = Message.ReadMessage(chunk)
+    messageHandler[message.cmd](message, c)
   })
 })
 
